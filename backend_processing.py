@@ -12,6 +12,7 @@ Description:
     and then outputs a GeoJSON file that can be used 
     later with the visualization options that Varun
     has provided.
+    
 
 Author:
     Taran Sooranahalli
