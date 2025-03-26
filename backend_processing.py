@@ -25,7 +25,8 @@ def load_data(path): #Loads data from a csv into a dataframe for processing
 
 def preprocess(dataframe): #Sorts the data geographically
     dataframe = dataframe.dropna(subset=['latitude', 'longitude'])
-    dataframe = dataframe.sort(by=['latitude', 'longitude'])
+    dataframe = dataframe.sort_values(by=['latitude', 'longitude'])
+
     return dataframe
 
 def convert_geodata(dataframe): #Convert this to a usable dataframe format for displaying
@@ -38,12 +39,16 @@ def run_model(dataframe, clusters=10): #Machine learning model that will cluster
     dataframe['cluster_mapping'] = new_model.fit_predict(coordinates)
     return dataframe, new_model
 
-def main_wf(path): #Runs the workflow of processing the data in order
+def main_wf(path): 
     wildfire_df = load_data(path)
     geo_wildfire = preprocess(wildfire_df)
     cluster_df, wildfire_model = run_model(geo_wildfire)
     geo_wildfire_df = convert_geodata(cluster_df)
+    geo_wildfire_df["latitude"] = geo_wildfire_df.geometry.y
+    geo_wildfire_df["longitude"] = geo_wildfire_df.geometry.x
+    # Convert the dataframe to JSON and return
     return geo_wildfire_df, wildfire_model
+
 
 if __name__ == "__main__": #Run the whole pipeline
     file = '' #input wildfire data source here
