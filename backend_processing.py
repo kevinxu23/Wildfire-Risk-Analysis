@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
 import geopandas as gpd
 
 """
@@ -10,12 +12,7 @@ Description:
     This script processes wildfire data from CSV files, 
     sorts it geographically, runs a KMeans model on it,
     and then outputs a GeoJSON file that can be used 
-    later with the visualization options that Varun
-    has provided.
-    
-
-Author:
-    Taran Sooranahalli
+    later with the visualization options of the frontend.
 """
 
 
@@ -33,21 +30,30 @@ def convert_geodata(dataframe): #Convert this to a usable dataframe format for d
     geo_df = gpd.GeoDataFrame(dataframe, geometry=gpd.points_from_xy(dataframe.longitude, dataframe.latitude), crs='EPSG:4326')
     return geo_df
 
-def run_model(dataframe, clusters=10): #Machine learning model that will cluster the wildfire data and should provide some insight on similarities
+def run_model(dataframe, clusters=10, scale_features=True): #Machine learning model that will cluster the wildfire data and should provide some insight on similarities
     coordinates = dataframe[['latitude', 'longitude']].values
+    if scale_features:
+        scaler = StandardScaler()
+        coordinates_scaled = scaler.fit_transform(coordinates)
+    else:
+        coordinates_scaled = coordinates
     new_model = KMeans(n_clusters=clusters, random_state=9)
-    dataframe['cluster_mapping'] = new_model.fit_predict(coordinates)
-    return dataframe, new_model
+    dataframe['cluster_mapping'] = new_model.fit_predict(coordinates_scaled)
+
+    #compute sillohuette score to determine the best number of clusters
+    score = silhouette_score(coordinates_scaled, dataframe['cluster_mapping'])
+    print("KMeans Silhouette Score:", score)
+    return dataframe, new_model, score
 
 def main_wf(path): 
     wildfire_df = load_data(path)
     geo_wildfire = preprocess(wildfire_df)
-    cluster_df, wildfire_model = run_model(geo_wildfire)
+    cluster_df, wildfire_model, score = run_model(geo_wildfire)
     geo_wildfire_df = convert_geodata(cluster_df)
     geo_wildfire_df["latitude"] = geo_wildfire_df.geometry.y
     geo_wildfire_df["longitude"] = geo_wildfire_df.geometry.x
     # Convert the dataframe to JSON and return
-    return geo_wildfire_df, wildfire_model
+    return geo_wildfire_df, wildfire_model, score
 
 
 if __name__ == "__main__": #Run the whole pipeline
