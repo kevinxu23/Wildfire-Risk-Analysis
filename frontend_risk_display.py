@@ -25,12 +25,19 @@ def main():
 
     # Load and process data from the backend
     file_path = "MODIS_C6_1_USA_contiguous_and_Hawaii_24h.csv"  # Replace with the actual data file
-    df, _, silhouette = main_wf(file_path)  # Call backend to get processed data
+    df, _, silhouette, cluster_stats = main_wf(file_path) # Call backend to get processed data
     df["geometry"] = df["geometry"].apply(lambda geom: geom.wkt if geom is not None else None)
 
     # Display silhouette score if available
     if silhouette is not None:
         st.markdown(f"**KMeans Silhouette Score:** {silhouette:.3f}")
+    
+    # new - Display cluster summary statistics if available
+    if not cluster_stats.empty:
+        st.subheader("Cluster Summary Statistics")
+        st.dataframe(cluster_stats)
+    else:
+        st.write("No cluster statistics available.")
 
     #New interactive UI stuff by Taran Sooranahalli
     st.markdown("---")
