@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import pydeck as pdk
 from backend_processing import main_wf  # Import the backend processing function
+from backend_processing import run_model
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
@@ -36,11 +37,12 @@ def main():
     st.header("Interactive Wildfire Explorer")
 
     st.sidebar.header("Controls") #Might add more modularity in the future
+    number = st.sidebar.slider("# of Clusters", min_value=2, max_value=20, value=9) #New slider bar to adjust number of clusters
+    df, model, _ = run_model(df, clusters=number) #Run the model with the updated cluster number
+    df['cluster_mapping'] = df['cluster_mapping'].astype(str) #Save the mapping to the df
 
-    df['cluster_mapping'] = df['cluster_mapping'].astype(str)
-
-    unique_clusters = sorted(df['cluster_mapping'].unique()) #Generating colors
-    cluster_colors = generate_cluster_colors(unique_clusters)
+    unique = sorted(df['cluster_mapping'].unique()) #Generating colors
+    cluster_colors = generate_cluster_colors(unique)
     df['color'] = df['cluster_mapping'].map(cluster_colors)
 
 
@@ -49,9 +51,13 @@ def main():
     brightness_range = st.sidebar.slider("Brightness Range", min_brightness, max_brightness, (min_brightness, max_brightness)) #Used ChatGPT to debug this feature
     df = df[(df['brightness'] >= brightness_range[0]) & (df['brightness'] <= brightness_range[1])]
 
+    map_theme = st.sidebar.selectbox("Map Theme", ["Dark", "Light"]) #Toggle for making the map light or dark mode
+    
+
 
     st.subheader("Clustered Wildfire Map") #Displaying map, allows you to hover on points too
     st.pydeck_chart(pdk.Deck(
+        map_style = "mapbox://styles/mapbox/light-v9" if map_theme == "Light" else "mapbox://styles/mapbox/dark-v9",
         initial_view_state=pdk.ViewState(
             latitude=df['latitude'].mean(),
             longitude=df['longitude'].mean(),
