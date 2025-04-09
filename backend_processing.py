@@ -24,7 +24,33 @@ def preprocess(dataframe): #Sorts the data geographically
     dataframe = dataframe.dropna(subset=['latitude', 'longitude'])
     dataframe = dataframe.sort_values(by=['latitude', 'longitude'])
 
+    # new - intensity_score if both brightness and frp columns exist
+    if 'brightness' in dataframe.columns and 'frp' in dataframe.columns:
+        dataframe['intensity_score'] = (dataframe['brightness'] * 0.6 + dataframe['frp'] * 0.4).round(2)
+
     return dataframe
+
+# new function - cluster summary statistics - compuytes avg values for each cluster
+def get_cluster_summary(dataframe):
+    if 'intensity_score' not in dataframe.columns:
+        dataframe['intensity_score'] = (dataframe['brightness'] * 0.6 + dataframe['frp'] * 0.4).round(2)
+
+    # groupby
+    summary = dataframe.groupby("cluster_mapping").agg({
+        "brightness": "mean",
+        "frp": "mean",
+        "intensity_score": "mean"
+    }).reset_index()
+
+    summary = summary.rename(columns={
+        'brightness': 'avg_brightness',
+        'frp': 'avg_frp',
+        'intensity_score': 'avg_risk'
+    })
+    
+    summary = summary.round(2)
+    return summary
+
 
 def convert_geodata(dataframe): #Convert this to a usable dataframe format for displaying
     geo_df = gpd.GeoDataFrame(dataframe, geometry=gpd.points_from_xy(dataframe.longitude, dataframe.latitude), crs='EPSG:4326')
@@ -52,8 +78,12 @@ def main_wf(path):
     geo_wildfire_df = convert_geodata(cluster_df)
     geo_wildfire_df["latitude"] = geo_wildfire_df.geometry.y
     geo_wildfire_df["longitude"] = geo_wildfire_df.geometry.x
+
+    # new - obtain cluster summary stats
+    cluster_stats = get_cluster_summary(cluster_df)
+
     # Convert the dataframe to JSON and return
-    return geo_wildfire_df, wildfire_model, score
+    return geo_wildfire_df, wildfire_model, score, cluster_stats
 
 
 if __name__ == "__main__": #Run the whole pipeline
