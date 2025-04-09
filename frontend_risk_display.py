@@ -17,6 +17,16 @@ def generate_cluster_colors(cluster_ids):
     }
     return cluster_colors
 
+def label_cluster(cluster_id, cluster_brightness):
+    avg_brightness = cluster_brightness.get(cluster_id, 0)
+    if avg_brightness >= 400:
+        return "High Risk"
+    elif avg_brightness >= 200:
+        return "Medium Risk"
+    else:
+        return "Low Risk"
+
+
 def main():
     # Set the page title and icon
     st.set_page_config(page_title="Wildfire Risk Dashboard", page_icon="🔥")
@@ -44,15 +54,19 @@ def main():
     st.header("Interactive Wildfire Explorer")
 
     st.sidebar.header("Controls") #Might add more modularity in the future
-    number = st.sidebar.slider("# of Clusters", min_value=2, max_value=20, value=9) #New slider bar to adjust number of clusters
+    number = st.sidebar.slider("Number of Clusters", min_value=2, max_value=20, value=9) #New slider bar to adjust number of clusters
     df, model, _ = run_model(df, clusters=number) #Run the model with the updated cluster number
     df['cluster_mapping'] = df['cluster_mapping'].astype(str) #Save the mapping to the df
+    cluster_brightness = df.groupby('cluster_mapping')['brightness'].mean()
+
+
+    df['risk_label'] = df['cluster_mapping'].apply(lambda cid: label_cluster(cid, cluster_brightness))
 
     unique = sorted(df['cluster_mapping'].unique()) #Generating colors
     cluster_colors = generate_cluster_colors(unique)
     df['color'] = df['cluster_mapping'].map(cluster_colors)
 
-
+    
     min_brightness = float(df['brightness'].min())
     max_brightness = float(df['brightness'].max())
     brightness_range = st.sidebar.slider("Brightness Range", min_brightness, max_brightness, (min_brightness, max_brightness)) #Used ChatGPT to debug this feature
@@ -80,7 +94,7 @@ def main():
                 pickable=True,
             )
         ],
-        tooltip={"text": "Lat: {latitude}\nLon: {longitude}\nBrightness: {brightness}\nCluster: {cluster_mapping}"}
+        tooltip={"text": "Lat: {latitude}\nLon: {longitude}\nBrightness: {brightness}\nCluster: {cluster_mapping}\nRisk: {risk_label}"}
     ))
     
     
