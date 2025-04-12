@@ -4,6 +4,8 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score
 import geopandas as gpd
+import requests
+from io import StringIO
 
 """
 backend_processing.py
@@ -70,6 +72,35 @@ def run_model(dataframe, clusters=10, scale_features=True): #Machine learning mo
     score = silhouette_score(coordinates_scaled, dataframe['cluster_mapping'])
     print("KMeans Silhouette Score:", score)
     return dataframe, new_model, score
+
+def auto_update_and_train(url, clusters=10, scale_features=True, output_geojson="processed_wildfire_usable.json"):
+    """
+    Automatically pulls a new dataset from the given URL, processes the data,
+    trains the KMeans model, and outputs a GeoJSON file along with the model's outputs
+    url (str): URL pointing to the CSV dataset.
+    """
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  
+        data_string = response.content.decode('utf-8')
+        wildfire_df = pd.read_csv(StringIO(data_string))
+        print("New dataset downloaded and loaded successfully.")
+    except Exception as e:
+        print("Failed to download new dataset:", e)
+        return None, None, None, None
+
+    wildfire_df = preprocess(wildfire_df)
+    cluster_df, wildfire_model, score = run_model(wildfire_df, clusters=clusters, scale_features=scale_features)
+    geo_wildfire_df = convert_geodata(cluster_df)
+    geo_wildfire_df["latitude"] = geo_wildfire_df.geometry.y
+    geo_wildfire_df["longitude"] = geo_wildfire_df.geometry.x
+
+    cluster_stats = get_cluster_summary(cluster_df)
+
+    geo_wildfire_df.to_file(output_geojson, driver='GeoJSON')
+    print("Output GeoJSON saved to", output_geojson)
+    
+    return geo_wildfire_df, wildfire_model, score, cluster_stats
 
 def main_wf(path): 
     wildfire_df = load_data(path)
