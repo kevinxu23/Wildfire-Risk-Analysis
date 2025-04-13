@@ -58,6 +58,26 @@ def convert_geodata(dataframe): #Convert this to a usable dataframe format for d
     geo_df = gpd.GeoDataFrame(dataframe, geometry=gpd.points_from_xy(dataframe.longitude, dataframe.latitude), crs='EPSG:4326')
     return geo_df
 
+# added a risk label helper function
+def assign_risk_label(brightness):
+    if brightness >= 400:
+        return "High Risk"
+    elif brightness >= 200:
+        return "Medium Risk"
+    else:
+        return "Low Risk"
+    
+# new - created a cluster color mapping function
+def generate_cluster_colors(cluster_ids):
+    import matplotlib.pyplot as plt
+    num_clusters = len(cluster_ids)
+    color_map = plt.get_cmap('tab20', num_clusters)
+    cluster_colors = {
+        str(cluster): [int(c * 255) for c in color_map(i)[:3]] + [160]
+        for i, cluster in enumerate(cluster_ids)
+    }
+    return cluster_colors
+
 def run_model(dataframe, clusters=10, scale_features=True): #Machine learning model that will cluster the wildfire data and should provide some insight on similarities
     coordinates = dataframe[['latitude', 'longitude']].values
     if scale_features:
@@ -71,6 +91,15 @@ def run_model(dataframe, clusters=10, scale_features=True): #Machine learning mo
     #compute sillohuette score to determine the best number of clusters
     score = silhouette_score(coordinates_scaled, dataframe['cluster_mapping'])
     print("KMeans Silhouette Score:", score)
+
+     # new - risk labels 
+    dataframe['risk_label'] = dataframe['brightness'].apply(assign_risk_label)
+
+    # new - cluster color mapping
+    unique_clusters = sorted(dataframe['cluster_mapping'].unique())
+    cluster_colors = generate_cluster_colors(unique_clusters)
+    dataframe['color'] = dataframe['cluster_mapping'].astype(str).map(cluster_colors)
+    
     return dataframe, new_model, score
 
 def auto_update_and_train(url, clusters=10, scale_features=True, output_geojson="processed_wildfire_usable.json"):
