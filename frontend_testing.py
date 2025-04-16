@@ -53,6 +53,10 @@ class TestLabelCluster(unittest.TestCase):
         brightness_map = {'D': 199}
         self.assertEqual(label_cluster('D', brightness_map), "Low Risk")
 
+    def test_missing_cluster_id(self):
+        brightness_map = {}
+        self.assertEqual(label_cluster('Z', brightness_map), "Low Risk")  
+        # default to 0 brightness
 
 if __name__ == '__main__':
     unittest.main()
