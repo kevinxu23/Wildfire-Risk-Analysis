@@ -6,6 +6,7 @@ from backend_processing import main_wf  # Import the backend processing function
 from backend_processing import run_model
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import plotly.express as px  # Added for histogram visualization
 
 #Function to make new cluster colors to differentiate
 def generate_cluster_colors(cluster_ids):
@@ -26,6 +27,20 @@ def label_cluster(cluster_id, cluster_brightness):
     else:
         return "Low Risk"
 
+# New function to create a brightness histogram by cluster
+def create_brightness_histogram(dataframe):
+    fig = px.histogram(
+        dataframe, 
+        x="brightness", 
+        color="risk_label",
+        nbins=30,
+        opacity=0.7,
+        barmode="overlay",
+        title="Distribution of Brightness Values by Risk Level",
+        labels={"brightness": "Brightness", "count": "Number of Observations"}
+    )
+    fig.update_layout(legend_title="Risk Level")
+    return fig
 
 def main():
     # Set the page title and icon
@@ -102,16 +117,19 @@ def main():
     # Display the processed risk data in a table
     st.subheader("Processed Wildfire Data")
     st.dataframe(df)
+    
     st.markdown("---")
     st.subheader("Wildfire Brightness Levels")
 
-# Ensure 'latitude' and 'brightness' exist in the DataFrame
+    # Ensure 'latitude' and 'brightness' exist in the DataFrame
     if 'brightness' in df.columns:
         st.bar_chart(df[['latitude', 'brightness']].set_index('latitude'))
-
-    # Display a map with wildfire risk locations
-    # st.subheader("Wildfire Risk Map")
-    # st.map(df[['latitude', 'longitude']]) Old map, replaced by the interactive one above
+    
+    # New feature: Display brightness distribution histogram
+    st.markdown("---")
+    st.subheader("Brightness Distribution by Risk Level")
+    histogram = create_brightness_histogram(df)
+    st.plotly_chart(histogram, use_container_width=True)
 
 
 if __name__ == "__main__":
