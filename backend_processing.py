@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score
@@ -31,6 +32,31 @@ def preprocess(dataframe): #Sorts the data geographically
         dataframe['intensity_score'] = (dataframe['brightness'] * 0.6 + dataframe['frp'] * 0.4).round(2)
 
     return dataframe
+
+# new -   Creates a scatter plot of Brightness vs FRP (Fire Radiative Power) colored by Risk Level.
+def plot_wildfire_summary(dataframe, output_path="wildfire_summary_plot.png"):
+    if 'brightness' not in dataframe.columns or 'frp' not in dataframe.columns:
+        print("Error: Missing required columns 'brightness' and 'frp'. Cannot plot.")
+        return
+    
+    if 'risk_label' not in dataframe.columns:
+        # If risk_label isn't there, create it quickly
+        dataframe['risk_label'] = dataframe['brightness'].apply(assign_risk_label)
+    
+    plt.figure(figsize=(10, 6))
+    for label in dataframe['risk_label'].unique():
+        subset = dataframe[dataframe['risk_label'] == label]
+        plt.scatter(subset['brightness'], subset['frp'], label=label, alpha=0.6)
+    
+    plt.xlabel('Brightness')
+    plt.ylabel('Fire Radiative Power (FRP)')
+    plt.title('Wildfire Brightness vs FRP by Risk Level')
+    plt.legend(title="Risk Level")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(output_path)
+    plt.close()
+    print(f"Wildfire summary plot saved to {output_path}")
 
 # new function - cluster summary statistics - compuytes avg values for each cluster
 def get_cluster_summary(dataframe):
@@ -141,6 +167,8 @@ def main_wf(path):
 
     # new - obtain cluster summary stats
     cluster_stats = get_cluster_summary(cluster_df)
+
+    plot_wildfire_summary(cluster_df)
 
     # Convert the dataframe to JSON and return
     return geo_wildfire_df, wildfire_model, score, cluster_stats

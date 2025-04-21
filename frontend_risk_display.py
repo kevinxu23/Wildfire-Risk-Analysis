@@ -64,6 +64,15 @@ def main():
     else:
         st.write("No cluster statistics available.")
 
+    # 🆕 Display the wildfire summary scatter plot
+    st.markdown("---")
+    st.subheader("Wildfire Brightness vs FRP Scatter Plot")
+
+    try:
+        st.image("wildfire_summary_plot.png", caption="Wildfire Brightness vs Fire Radiative Power (FRP)", use_container_width=True)
+    except Exception as e:
+        st.error(f"Failed to load wildfire summary plot: {e}")
+
     #New interactive UI stuff by Taran Sooranahalli
     st.markdown("---")
     st.header("Interactive Wildfire Explorer")
