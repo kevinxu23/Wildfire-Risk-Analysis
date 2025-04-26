@@ -5,7 +5,7 @@ import pydeck as pdk
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import plotly.express as px  # Added for histogram visualization
-from backend_processing import main_wf, run_model, auto_update_and_train
+from backend_processing import main_wf, run_model, auto_update_and_train, load_water_resources
 
 # Function to make new cluster colors to differentiate
 def generate_cluster_colors(cluster_ids):
@@ -67,6 +67,7 @@ def main():
         st.warning("No data loaded.")
         return
 
+    # water_df = load_water_resources(..., ...)
     df["geometry"] = df["geometry"].apply(lambda geom: geom.wkt if geom is not None else None)
 
     if silhouette is not None:

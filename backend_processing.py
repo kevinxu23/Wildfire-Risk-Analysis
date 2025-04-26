@@ -157,6 +157,13 @@ def auto_update_and_train(url, clusters=10, scale_features=True, output_geojson=
     
     return geo_wildfire_df, wildfire_model, score, cluster_stats
 
+def load_water_resources(filepath, max_sites=2000):
+    df = pd.read_csv(filepath)
+    df = df[['name', 'latitude', 'longitude']].dropna()
+    df = df.head(max_sites)
+    return df
+
+
 def main_wf(path): 
     wildfire_df = load_data(path)
     geo_wildfire = preprocess(wildfire_df)
