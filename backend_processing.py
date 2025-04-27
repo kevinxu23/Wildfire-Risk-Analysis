@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score
@@ -32,6 +33,31 @@ def preprocess(dataframe): #Sorts the data geographically
 
     return dataframe
 
+# new -   Creates a scatter plot of Brightness vs FRP (Fire Radiative Power) colored by Risk Level.
+def plot_wildfire_summary(dataframe, output_path="wildfire_summary_plot.png"):
+    if 'brightness' not in dataframe.columns or 'frp' not in dataframe.columns:
+        print("Error: Missing required columns 'brightness' and 'frp'. Cannot plot.")
+        return
+    
+    if 'risk_label' not in dataframe.columns:
+        # If risk_label isn't there, create it quickly
+        dataframe['risk_label'] = dataframe['brightness'].apply(assign_risk_label)
+    
+    plt.figure(figsize=(10, 6))
+    for label in dataframe['risk_label'].unique():
+        subset = dataframe[dataframe['risk_label'] == label]
+        plt.scatter(subset['brightness'], subset['frp'], label=label, alpha=0.6)
+    
+    plt.xlabel('Brightness')
+    plt.ylabel('Fire Radiative Power (FRP)')
+    plt.title('Wildfire Brightness vs FRP by Risk Level')
+    plt.legend(title="Risk Level")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(output_path)
+    plt.close()
+    print(f"Wildfire summary plot saved to {output_path}")
+
 # new function - cluster summary statistics - compuytes avg values for each cluster
 def get_cluster_summary(dataframe):
     if 'intensity_score' not in dataframe.columns:
@@ -58,6 +84,26 @@ def convert_geodata(dataframe): #Convert this to a usable dataframe format for d
     geo_df = gpd.GeoDataFrame(dataframe, geometry=gpd.points_from_xy(dataframe.longitude, dataframe.latitude), crs='EPSG:4326')
     return geo_df
 
+# added a risk label helper function
+def assign_risk_label(brightness):
+    if brightness >= 400:
+        return "High Risk"
+    elif brightness >= 200:
+        return "Medium Risk"
+    else:
+        return "Low Risk"
+    
+# new - created a cluster color mapping function
+def generate_cluster_colors(cluster_ids):
+    import matplotlib.pyplot as plt
+    num_clusters = len(cluster_ids)
+    color_map = plt.get_cmap('tab20', num_clusters)
+    cluster_colors = {
+        str(cluster): [int(c * 255) for c in color_map(i)[:3]] + [160]
+        for i, cluster in enumerate(cluster_ids)
+    }
+    return cluster_colors
+
 def run_model(dataframe, clusters=10, scale_features=True): #Machine learning model that will cluster the wildfire data and should provide some insight on similarities
     coordinates = dataframe[['latitude', 'longitude']].values
     if scale_features:
@@ -71,6 +117,15 @@ def run_model(dataframe, clusters=10, scale_features=True): #Machine learning mo
     #compute sillohuette score to determine the best number of clusters
     score = silhouette_score(coordinates_scaled, dataframe['cluster_mapping'])
     print("KMeans Silhouette Score:", score)
+
+     # new - risk labels 
+    dataframe['risk_label'] = dataframe['brightness'].apply(assign_risk_label)
+
+    # new - cluster color mapping
+    unique_clusters = sorted(dataframe['cluster_mapping'].unique())
+    cluster_colors = generate_cluster_colors(unique_clusters)
+    dataframe['color'] = dataframe['cluster_mapping'].astype(str).map(cluster_colors)
+    
     return dataframe, new_model, score
 
 def auto_update_and_train(url, clusters=10, scale_features=True, output_geojson="processed_wildfire_usable.json"):
@@ -102,6 +157,13 @@ def auto_update_and_train(url, clusters=10, scale_features=True, output_geojson=
     
     return geo_wildfire_df, wildfire_model, score, cluster_stats
 
+def load_water_resources(filepath, max_sites=2000):
+    df = pd.read_csv(filepath)
+    df = df[['name', 'latitude', 'longitude']].dropna()
+    df = df.head(max_sites)
+    return df
+
+
 def main_wf(path): 
     wildfire_df = load_data(path)
     geo_wildfire = preprocess(wildfire_df)
@@ -112,6 +174,8 @@ def main_wf(path):
 
     # new - obtain cluster summary stats
     cluster_stats = get_cluster_summary(cluster_df)
+
+    plot_wildfire_summary(cluster_df)
 
     # Convert the dataframe to JSON and return
     return geo_wildfire_df, wildfire_model, score, cluster_stats
