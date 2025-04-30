@@ -79,7 +79,7 @@ def main():
     else:
         st.write("No cluster statistics available.")
 
-    # 🆕 Display the wildfire summary scatter plot
+    #Display the wildfire summary scatter plot
     st.markdown("---")
     st.subheader("Wildfire Brightness vs FRP Scatter Plot")
 
@@ -93,7 +93,12 @@ def main():
 
     st.sidebar.header("Controls")
     number = st.sidebar.slider("Number of Clusters", min_value=2, max_value=20, value=9)
-    df, model, _ = run_model(df, clusters=number)
+    
+    #Added retrain model button
+    if st.sidebar.button("Retrain Model"):
+        df, model, _ = run_model(df, clusters=number)
+        st.success(f"Model retrained successfully with {number} clusters!")
+    
     df['cluster_mapping'] = df['cluster_mapping'].astype(str)
 
     cluster_brightness = df.groupby('cluster_mapping')['brightness'].mean()
@@ -102,6 +107,14 @@ def main():
     unique = sorted(df['cluster_mapping'].unique())
     cluster_colors = generate_cluster_colors(unique)
     df['color'] = df['cluster_mapping'].map(cluster_colors)
+
+    #Added cluster filter
+    selected_risks = st.sidebar.multiselect(
+        "Select Risk Levels to Display",
+        options=df['risk_label'].unique(),
+        default=df['risk_label'].unique()
+    )
+    df = df[df['risk_label'].isin(selected_risks)]
 
     min_brightness = float(df['brightness'].min())
     max_brightness = float(df['brightness'].max())
