@@ -1,6 +1,6 @@
 import unittest
 import pandas as pd
-from backend_processing import preprocess, run_model, get_cluster_summary
+from backend_processing import preprocess, run_model, get_cluster_summary, assign_risk_label
 
 class TestBackendProcessing(unittest.TestCase):
     def setUp(self):
@@ -27,6 +27,12 @@ class TestBackendProcessing(unittest.TestCase):
         self.assertIn('avg_frp', summary.columns)
         self.assertIn('avg_risk', summary.columns)
         self.assertEqual(len(summary), 2)
+
+    def test_assign_risk_label(self):
+        self.assertEqual(assign_risk_label(450), "High Risk")
+        self.assertEqual(assign_risk_label(250), "Medium Risk")
+        self.assertEqual(assign_risk_label(100), "Low Risk")
+
 
 if __name__ == '__main__':
     unittest.main()
