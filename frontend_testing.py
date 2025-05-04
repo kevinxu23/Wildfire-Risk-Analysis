@@ -36,6 +36,12 @@ class TestFrontendRiskDisplay(unittest.TestCase):
         for color in result.values():
             self.assertEqual(len(color), 4)
 
+    def test_colors_distinct(self):
+        cluster_ids = ['0', '1', '2', '3', '4']
+        color_gen = generate_cluster_colors(cluster_ids)
+        colors = {tuple(val) for val in color_gen.values()}
+        self.assertEqual(len(colors), len(cluster_ids))
+
 class TestLabelCluster(unittest.TestCase):
     def test_high_risk(self):
         brightness_map = {'A': 401}
