@@ -67,6 +67,11 @@ To run the application, type in the following command
 streamlit run frontend_risk_display.py
 ```
 
+In another terminal window, run the following:
+```
+python3 backend_process.py
+```
+
 ## Access the Dashboard
 
 Open your web browser and navigate to the following URL:
