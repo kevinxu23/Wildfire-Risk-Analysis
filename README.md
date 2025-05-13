@@ -24,10 +24,10 @@ Although our project is not fully finished (as the database was not yet implemen
 In your source directory, run the following command.
 
 ```
-git clone https://github.com/AydanPirani/Assignment-Aggregator-App.git
+git clone https://github.com/CS222-UIUC/team-92-project.git
 ```
 
-## Initial venv Installation and Activation
+## Install & Activate venv
 
 Then after cloning the repo, navigate into the project directory and run the following to install venv.
 ```
