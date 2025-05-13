@@ -74,16 +74,16 @@ Open your web browser and navigate to the following URL:
 http://localhost:8501
 ```
 
-## Usage
+# Usage
 
-# Data Source
+## Data Source
 The system uses MODIS C6.1 satellite data for USA and Hawaii, tracking:
 * Latitude/Longitude coordinates
 * Brightness values
 * Fire Radiative Power (FRP)
 * Acquisition date/time
 
-# Interacting with the Website
+## Interacting with the Website
 * Select data source (default file or URL)
 * Adjust clustering parameters
 * Filter risk levels and brightness ranges
