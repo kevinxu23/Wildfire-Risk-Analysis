@@ -39,14 +39,6 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-## Running venv
-
-Before running any code, run the following:
-
-```
-venv/Scripts/activate/
-```
-
 # Development
 
 
