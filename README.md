@@ -4,6 +4,11 @@ This project implements a real-time wildfire risk analysis and visualization sys
 
 If you are curious about this project even more, you can view the full project proposal at this [link](https://docs.google.com/document/d/1mJfcj2Yqdt3pFBDxfyTddpwHykLodA7CjMqltXxeUvA/edit?usp=sharing).
 
+About the project:
+* Provides a good visual of data
+* Clusters data and calculates risk
+* Ability to input datasets
+
 # Technical Architecture
 
 ![Wildfire Risk Prevention Technical Architecture](https://github.com/CS222-UIUC/team-92-project/blob/main/Architecture.png)
