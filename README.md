@@ -8,14 +8,14 @@ If you are curious about this project even more, you can view the full project p
 
 ![Wildfire Risk Prevention Technical Architecture](https://github.com/CS222-UIUC/team-92-project/blob/main/Architecture.png)
 
-Although our project is not fully finished (as the database was not yet implemented), the above architecture would represent the final product of the Wildfire Risk Prevention system if a SQL database and API services were integrated into it in the future.
+Although our project is not fully finished (the database has not yet been implemented), the above architecture would represent the final product of the Wildfire Risk Prevention system if a SQL database and API services were integrated into it in the future.
 
 # Developers
 
 - **Taran Sooranahalli**: Created interactive UI with tables representing Wildfire Data and found datasets
 - **Adal Padilla**: Worked on K-Means Clustering ML Model development and training
 - **Kevin Xu**: Implemented both frontend and backend test files
-- **Varun Madhan**: Devleoped the heat map, upload dataset, and other niche features of the fronend UI
+- **Varun Madhan**: Developed the heat map, uploaded dataset, and other niche features of the frontend UI
 
 # Environment Setup
 
@@ -52,7 +52,7 @@ venv/Scripts/activate/
 
 ## Package Management
 
-To prevent an errors during compilation, run the following command to install all required packages:
+To prevent errors during compilation, run the following command to install all required packages:
 ```
 pip install pandas numpy scikit-learn geopandas streamlit pydeck plotly matplotlib
 ```
@@ -82,7 +82,7 @@ http://localhost:8501
 # Usage
 
 ## Data Source
-The system uses MODIS C6.1 satellite data for USA and Hawaii, tracking:
+The system uses MODIS C6.1 satellite data for the USA and Hawaii, tracking:
 * Latitude/Longitude coordinates
 * Brightness values
 * Fire Radiative Power (FRP)
