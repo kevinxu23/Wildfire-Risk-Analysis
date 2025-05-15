@@ -51,7 +51,7 @@ source venv/bin/activate
 
 To prevent errors during compilation, run the following command to install all required packages:
 ```
-pip install pandas numpy scikit-learn geopandas streamlit pydeck plotly matplotlib
+pip install pandas numpy matplotlib scikit-learn geopandas streamlit plotly pydeck requests
 ```
 
 
@@ -75,6 +75,8 @@ Open your web browser and navigate to the following URL:
 ```
 http://localhost:8501
 ```
+
+Note that streamlit will automatically redirect you to the localhost URL, but if it does not, please go to the following URL above.
 
 # Usage
 
