@@ -13,15 +13,6 @@ About the project:
 
 ![Wildfire Risk Prevention Technical Architecture](https://github.com/CS222-UIUC/team-92-project/blob/main/Architecture.png)
 
-Although our project is not fully finished (the database has not yet been implemented), the above architecture would represent the final product of the Wildfire Risk Prevention system if a SQL database and API services were integrated into it in the future.
-
-# Developers
-
-- **Taran Sooranahalli**: Created interactive UI with tables representing Wildfire Data and found datasets
-- **Adal Padilla**: Worked on K-Means Clustering ML Model development and training
-- **Kevin Xu**: Implemented both frontend and backend test files
-- **Varun Madhan**: Developed the heat map, uploaded dataset, and other niche features of the frontend UI
-
 # Environment Setup
 
 ## Clone the Repository
